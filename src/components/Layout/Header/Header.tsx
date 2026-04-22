@@ -4,7 +4,7 @@ export function Header() {
    const navItems = [
      { label: "Menu", href: "#menu"},
      { label: "Plan", href: "#plan" },
-     { label: "Recipes", href: "#recipes" },
+     { label: "Recipes", href: "/recipes" },
      { label: "History", href: "/history" },
      { label: "Suggest", href: "/suggest" },
      { label: "Friends", href: "#friends" },
