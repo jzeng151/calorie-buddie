@@ -91,3 +91,19 @@ supabase/migrations/20260422000002_create_recipes_table.sql
 **Run this SQL in the Supabase dashboard** (SQL Editor → New query → paste → Run).  
 This creates the table, sets RLS to public-read, and seeds 20 starter recipes.  
 Full SQL is in the migration file above.
+
+---
+
+## Supabase: friendships table + friend stats function
+
+After the Friends page was added, a migration was created at:
+
+```
+supabase/migrations/20260422000003_create_friendships.sql
+```
+
+**Run this SQL in the Supabase dashboard** (SQL Editor → New query → paste → Run).  
+Full SQL is in the migration file above. It:
+- Adds a policy so authenticated users can read all profiles (needed for friend search)
+- Creates the `friendships` table with RLS
+- Creates the `get_friend_daily_stats(uuid[])` function (SECURITY DEFINER, safe aggregate)

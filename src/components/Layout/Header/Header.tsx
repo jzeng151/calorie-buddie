@@ -8,7 +8,7 @@ const navItems = [
   { label: "Recipes", href: "/recipes" },
   { label: "History", href: "/history" },
   { label: "Suggest", href: "/suggest" },
-  { label: "Friends", href: "#friends" },
+  { label: "Friends", href: "/friends" },
 ];
 
 export async function Header() {
