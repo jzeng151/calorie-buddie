@@ -3,7 +3,7 @@ import { ThemeToggle } from "../../Features/ThemeToggle"
 export function Header() {
    const navItems = [
      { label: "Menu", href: "#menu"},
-     { label: "Plan", href: "#plan" },
+     { label: "Plan", href: "/plan" },
      { label: "Recipes", href: "/recipes" },
      { label: "History", href: "/history" },
      { label: "Suggest", href: "/suggest" },
