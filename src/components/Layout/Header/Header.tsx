@@ -3,7 +3,7 @@ import { ThemeToggle } from "../../Features/ThemeToggle";
 import { createClient } from "@/lib/supabase/server";
 
 const navItems = [
-  { label: "Menu", href: "#menu" },
+  { label: "Menu", href: "/menu" },
   { label: "Plan", href: "/plan" },
   { label: "Recipes", href: "/recipes" },
   { label: "History", href: "/history" },
