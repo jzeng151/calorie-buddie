@@ -1,7 +1,7 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
-
+claude --resume 76f7f62c-c927-41e9-a874-3e741c7aaab2
 First, run the development server:
 
 ```bash

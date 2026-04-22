@@ -1,29 +1,37 @@
 'use client';
+import { useState, useEffect } from "react";
+import styles from "./ThemeToggle.module.css";
 
-import { useState } from 'react';
+export function ThemeToggle() {
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
-export default function ThemeToggle() {
-  const [theme, setTheme] = useState('light');
+  useEffect(() => {
+    const saved = localStorage.getItem("theme") as "light" | "dark" | null;
+    const initial = saved ?? "light";
+    setTheme(initial);
+    document.documentElement.setAttribute("data-theme", initial);
+  }, []);
 
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
+    const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
   };
 
   return (
-    <button
-      className="theme-toggle"
-      onClick={toggleTheme}
-      aria-label="Toggle between light and dark mode"
-      title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-    >
-      <span className="theme-toggle-icon">
-        {theme === 'light' ? '🌙' : '☀️'}
-      </span>
-      <span className="theme-toggle-label">
-        {theme === 'light' ? 'Dark' : 'Light'}
-      </span>
-    </button>
+    <div className={styles["slider-container"]}>
+      <button
+        className={`${styles.slider} ${theme === "dark" ? styles.active : ""}`}
+        onClick={toggleTheme}
+        title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+      >
+        <div className={styles["slider-track"]}>
+          <div className={styles["slider-thumb"]}></div>
+        </div>
+        <span className={styles["slider-icon-moon"]}>🌙</span>
+        <span className={styles["slider-icon-sun"]}>☀️</span>
+      </button>
+    </div>
   );
 }
