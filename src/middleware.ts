@@ -47,7 +47,13 @@ export async function middleware(request: NextRequest) {
   });
 
   if (decision.type === "redirect") {
-    return NextResponse.redirect(new URL(decision.to, request.url));
+    // Preserve refreshed Supabase auth cookies on redirect responses, otherwise
+    // the browser drops rotated tokens and the next request 401s.
+    const redirectResponse = NextResponse.redirect(new URL(decision.to, request.url));
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie);
+    });
+    return redirectResponse;
   }
   return supabaseResponse;
 }

@@ -88,19 +88,28 @@ export default function PlanPage() {
     setSaving(true);
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await supabase.from("meals_log").insert({
-        user_id: user.id,
-        name: current.name,
-        calories_per_serving: current.calories_per_serving,
-        servings,
-        meal_type: current.meal_type,
-      });
-      const total = Math.round(current.calories_per_serving * servings);
-      setRemaining((r) => (r !== null ? r - total : null));
-      setLogged((prev) => [...prev, current]);
+    if (!user) {
+      setSaving(false);
+      setShowModal(false);
+      return;
     }
+    const { error } = await supabase.from("meals_log").insert({
+      user_id: user.id,
+      name: current.name,
+      calories_per_serving: current.calories_per_serving,
+      servings,
+      meal_type: current.meal_type,
+    });
     setSaving(false);
+    if (error) {
+      // Keep the sheet open and the current card in place so the user can retry.
+      // No persisted row = no UI state advance.
+      alert("Couldn't log that meal. Check your connection and try again.");
+      return;
+    }
+    const total = Math.round(current.calories_per_serving * servings);
+    setRemaining((r) => (r !== null ? r - total : null));
+    setLogged((prev) => [...prev, current]);
     setShowModal(false);
     setIndex((i) => i + 1);
   }
