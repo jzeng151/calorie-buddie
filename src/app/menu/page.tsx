@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { startOfTodayUtcIso } from "@/lib/time";
 
 const MEAL_SLOTS = [
   { type: "breakfast", label: "Breakfast", emoji: "🌅" },
@@ -32,7 +33,7 @@ export default async function MenuPage() {
       .from("meals_log")
       .select("id, name, calories_per_serving, servings, meal_type")
       .eq("user_id", user.id)
-      .gte("logged_at", new Date(new Date().setHours(0, 0, 0, 0)).toISOString())
+      .gte("logged_at", startOfTodayUtcIso())
       .order("logged_at", { ascending: true }),
   ]);
 

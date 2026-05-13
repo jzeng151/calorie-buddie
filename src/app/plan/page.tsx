@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { shuffle } from "@/lib/random/shuffle";
+import { startOfTodayUtcIso } from "@/lib/time";
 
 type Recipe = {
   id: string;
@@ -44,7 +45,7 @@ export default function PlanPage() {
           .from("meals_log")
           .select("calories_per_serving, servings")
           .eq("user_id", user.id)
-          .gte("logged_at", new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
+          .gte("logged_at", startOfTodayUtcIso()),
       ]);
 
       const target = profileRes.data?.daily_calorie_target ?? 2000;

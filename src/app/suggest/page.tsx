@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { startOfTodayUtcIso } from "@/lib/time";
 
 const MEAL_TYPE_ORDER = ["breakfast", "lunch", "dinner", "snack"] as const;
 const MEAL_TYPE_LABELS: Record<string, string> = {
@@ -34,7 +35,7 @@ export default async function SuggestPage() {
       .from("meals_log")
       .select("calories_per_serving, servings")
       .eq("user_id", user.id)
-      .gte("logged_at", new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
+      .gte("logged_at", startOfTodayUtcIso()),
     supabase
       .from("recipes")
       .select("id, name, description, calories_per_serving, meal_type, emoji")

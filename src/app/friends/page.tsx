@@ -174,7 +174,11 @@ export default function FriendsPage() {
 
   async function removeFriend(friendshipId: string) {
     const supabase = createClient();
-    await supabase.from("friendships").delete().eq("id", friendshipId);
+    const { error } = await supabase.from("friendships").delete().eq("id", friendshipId);
+    if (error) {
+      alert("Couldn't remove that friend. Please try again.");
+      return;
+    }
     setFriends((prev) => prev.filter((f) => f.friendship_id !== friendshipId));
   }
 
