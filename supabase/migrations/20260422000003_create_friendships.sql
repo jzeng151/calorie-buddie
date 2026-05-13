@@ -27,15 +27,17 @@ CREATE POLICY "Users can send friend requests"
   ON public.friendships FOR INSERT
   WITH CHECK (auth.uid() = requester_id AND status = 'pending');
 
--- Addressee may flip status pending → accepted. WITH CHECK rejects any other
--- transition. Column immutability for id/requester_id/addressee_id is enforced
--- by the trigger below (WITH CHECK can't reference OLD).
+-- Addressee may flip status pending → accepted. WITH CHECK pins the post-update
+-- status to 'accepted' so an addressee can't downgrade an already-accepted row
+-- back to 'pending' (which would silently revoke friend-gated RPC access and
+-- block the requester from creating a fresh request). Column immutability for
+-- id/requester_id/addressee_id is enforced by the trigger below.
 CREATE POLICY "Addressees can accept requests"
   ON public.friendships FOR UPDATE
   USING (auth.uid() = addressee_id)
   WITH CHECK (
     auth.uid() = addressee_id
-    AND status IN ('pending', 'accepted')
+    AND status = 'accepted'
   );
 
 CREATE POLICY "Users can remove friendships"

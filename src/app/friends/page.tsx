@@ -145,7 +145,14 @@ export default function FriendsPage() {
   async function sendRequest(addresseeId: string) {
     if (!me) return;
     const supabase = createClient();
-    await supabase.from("friendships").insert({ requester_id: me.id, addressee_id: addresseeId });
+    const { error } = await supabase
+      .from("friendships")
+      .insert({ requester_id: me.id, addressee_id: addresseeId });
+    if (error) {
+      // Surface failure so the user can retry instead of seeing a false "Requested" state.
+      alert("Couldn't send the request. Please try again.");
+      return;
+    }
     setSentIds((prev) => new Set([...prev, addresseeId]));
   }
 
