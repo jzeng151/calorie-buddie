@@ -29,7 +29,7 @@ export default async function SuggestPage() {
       .from("users")
       .select("daily_calorie_target")
       .eq("id", user.id)
-      .single(),
+      .maybeSingle(),
     supabase
       .from("meals_log")
       .select("calories_per_serving, servings")

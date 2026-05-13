@@ -23,7 +23,7 @@ export async function Header() {
       .from("users")
       .select("username, avatar_url")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
     avatar = profile?.avatar_url ?? null;
     displayName = profile?.username ?? user.email?.split("@")[0] ?? null;
   }

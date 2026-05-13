@@ -24,20 +24,7 @@ type DaySummary = {
   total: number;
 };
 
-function formatDateLabel(dateStr: string, todayStr: string, yesterdayStr: string): string {
-  if (dateStr === todayStr) return "Today";
-  if (dateStr === yesterdayStr) return "Yesterday";
-  const d = new Date(dateStr + "T12:00:00");
-  return d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
-}
-
-function toLocalDateStr(isoStr: string): string {
-  const d = new Date(isoStr);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
+import { formatDateLabel, toLocalDateStr } from "@/lib/date/local";
 
 export default async function HistoryPage() {
   const supabase = await createClient();
@@ -49,7 +36,7 @@ export default async function HistoryPage() {
       .from("users")
       .select("daily_calorie_target")
       .eq("id", user.id)
-      .single(),
+      .maybeSingle(),
     supabase
       .from("meals_log")
       .select("id, name, calories_per_serving, servings, meal_type, logged_at")

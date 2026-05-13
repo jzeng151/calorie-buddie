@@ -32,7 +32,7 @@ export default function ProfilePage() {
         .from("users")
         .select("username, avatar_url, daily_calorie_target")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
       if (data) {
         setProfile(data);
         setUsername(data.username ?? "");

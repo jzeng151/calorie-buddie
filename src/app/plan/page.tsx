@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { shuffle } from "@/lib/random/shuffle";
 
 type Recipe = {
   id: string;
@@ -14,15 +15,6 @@ type Recipe = {
 };
 
 type SwipeDir = "left" | "right" | null;
-
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
 
 export default function PlanPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -47,7 +39,7 @@ export default function PlanPage() {
 
       const [recipesRes, profileRes, mealsRes] = await Promise.all([
         supabase.from("recipes").select("id, name, description, calories_per_serving, meal_type, emoji"),
-        supabase.from("users").select("daily_calorie_target").eq("id", user.id).single(),
+        supabase.from("users").select("daily_calorie_target").eq("id", user.id).maybeSingle(),
         supabase
           .from("meals_log")
           .select("calories_per_serving, servings")

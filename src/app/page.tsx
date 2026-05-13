@@ -51,7 +51,7 @@ export default async function Home() {
       .from("users")
       .select("username, avatar_url, daily_calorie_target")
       .eq("id", user.id)
-      .single(),
+      .maybeSingle(),
     supabase
       .from("meals_log")
       .select("id, name, calories_per_serving, servings, meal_type, logged_at")

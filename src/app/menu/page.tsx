@@ -27,7 +27,7 @@ export default async function MenuPage() {
       .from("users")
       .select("daily_calorie_target")
       .eq("id", user.id)
-      .single(),
+      .maybeSingle(),
     supabase
       .from("meals_log")
       .select("id, name, calories_per_serving, servings, meal_type")
