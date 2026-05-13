@@ -3,19 +3,13 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-
-const MEAL_TYPES = [
-  { value: "breakfast", label: "Breakfast" },
-  { value: "lunch", label: "Lunch" },
-  { value: "dinner", label: "Dinner" },
-  { value: "snack", label: "Snack" },
-] as const;
-
-type MealType = (typeof MEAL_TYPES)[number]["value"];
-
-function isValidMealType(v: string | null): v is MealType {
-  return v === "breakfast" || v === "lunch" || v === "dinner" || v === "snack";
-}
+import {
+  MEAL_TYPES,
+  type MealType,
+  isValidMealType,
+  parsePrefillCalories,
+  parsePrefillName,
+} from "@/lib/log/prefill";
 
 export default function LogPage() {
   return (
@@ -29,12 +23,12 @@ function LogForm() {
   const router = useRouter();
   const params = useSearchParams();
 
-  const prefillName = params.get("name") ?? "";
-  const prefillCal = Number(params.get("calories") ?? 0);
+  const prefillName = parsePrefillName(params.get("name"));
+  const prefillCal = parsePrefillCalories(params.get("calories"));
   const prefillType = params.get("type");
 
   const [name, setName] = useState(prefillName);
-  const [caloriesPerServing, setCaloriesPerServing] = useState<number | "">(prefillCal || "");
+  const [caloriesPerServing, setCaloriesPerServing] = useState<number | "">(prefillCal);
   const [servings, setServings] = useState(1);
   const [mealType, setMealType] = useState<MealType>(isValidMealType(prefillType) ? prefillType : "snack");
   const [loading, setLoading] = useState(false);
