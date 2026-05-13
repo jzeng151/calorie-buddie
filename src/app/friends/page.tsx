@@ -41,7 +41,7 @@ export default function FriendsPage() {
   const [searching, setSearching] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { loadAll(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { loadAll(); }, []);
 
   async function loadAll() {
     setLoading(true);

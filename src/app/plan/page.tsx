@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 type Recipe = {
@@ -155,7 +156,7 @@ export default function PlanPage() {
               ? "No meals added — nothing matched today?"
               : `${logged.length} meal${logged.length > 1 ? "s" : ""} logged!`}
           </p>
-          <a href="/" style={homeLinkStyle}>Back to home</a>
+          <Link href="/" style={homeLinkStyle}>Back to home</Link>
         </div>
       )}
 
