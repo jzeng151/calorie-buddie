@@ -16,3 +16,15 @@ Key routing rules:
 - Design system, brand → invoke design-consultation
 - Visual audit, design polish → invoke design-review
 - Architecture review → invoke plan-eng-review
+
+## Testing
+
+- Unit/component: `npm test` (Vitest + Testing Library, jsdom). Files under `test/` or co-located `*.test.tsx`.
+- E2E: `npm run test:e2e` (Playwright, boots `npm run dev`). Specs under `e2e/`.
+- See [TESTING.md](./TESTING.md) for conventions.
+
+Expectations:
+- 100% coverage is the goal — tests make vibe coding safe.
+- New function → write a test. New conditional → test both branches.
+- Bug fix → write a regression test that fails on the old code.
+- Never commit code that makes existing tests fail.
