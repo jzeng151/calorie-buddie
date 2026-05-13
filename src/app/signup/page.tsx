@@ -11,6 +11,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -18,10 +19,19 @@ export default function SignupPage() {
     setError(null);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ email, password });
 
     if (error) {
       setError(error.message);
+      setLoading(false);
+      return;
+    }
+
+    // If email confirmation is enabled, signUp returns no session. Routing
+    // to /onboarding would bounce off middleware (userId is null) back to
+    // /login — show a pending-verification state instead.
+    if (!data.session) {
+      setAwaitingConfirmation(true);
       setLoading(false);
       return;
     }
@@ -34,6 +44,17 @@ export default function SignupPage() {
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
       <div style={{ width: "100%", maxWidth: 400, padding: "2rem" }}>
         <h1 style={{ marginBottom: "1.5rem", color: "var(--color-text-dark)" }}>Create account</h1>
+        {awaitingConfirmation ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <p style={{ color: "var(--color-text-dark)" }}>
+              Check your email — we sent a confirmation link to <strong>{email}</strong>.
+              Click it to finish creating your account, then sign in.
+            </p>
+            <Link href="/login" style={{ color: "var(--color-text-hover)" }}>
+              Back to sign in
+            </Link>
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           <input
             type="email"
@@ -57,12 +78,15 @@ export default function SignupPage() {
             {loading ? "Creating account..." : "Create account"}
           </button>
         </form>
-        <p style={{ marginTop: "1rem", textAlign: "center", color: "var(--color-text-dark)" }}>
-          Already have an account?{" "}
-          <Link href="/login" style={{ color: "var(--color-text-hover)" }}>
-            Sign in
-          </Link>
-        </p>
+        )}
+        {!awaitingConfirmation && (
+          <p style={{ marginTop: "1rem", textAlign: "center", color: "var(--color-text-dark)" }}>
+            Already have an account?{" "}
+            <Link href="/login" style={{ color: "var(--color-text-hover)" }}>
+              Sign in
+            </Link>
+          </p>
+        )}
       </div>
     </div>
   );

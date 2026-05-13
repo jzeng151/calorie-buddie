@@ -2,8 +2,8 @@ CREATE TABLE IF NOT EXISTS public.meals_log (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
   name TEXT NOT NULL,
-  calories_per_serving INTEGER NOT NULL,
-  servings NUMERIC(6,2) NOT NULL DEFAULT 1,
+  calories_per_serving INTEGER NOT NULL CHECK (calories_per_serving > 0),
+  servings NUMERIC(6,2) NOT NULL DEFAULT 1 CHECK (servings > 0),
   meal_type TEXT NOT NULL DEFAULT 'snack'
     CHECK (meal_type IN ('breakfast', 'lunch', 'dinner', 'snack')),
   logged_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

@@ -204,6 +204,10 @@ BEGIN
     RAISE EXCEPTION 'log_hydration: not authenticated';
   END IF;
 
+  -- Per-user transaction-scoped advisory lock serializes concurrent taps so
+  -- the check-then-insert can't race past the daily cap. Released at COMMIT.
+  PERFORM pg_advisory_xact_lock(hashtext('log_hydration:' || caller::text));
+
   SELECT COUNT(*) INTO today_count
   FROM public.hydration_logs
   WHERE user_id = caller

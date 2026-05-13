@@ -20,9 +20,12 @@ CREATE POLICY "Users can view their own friendships"
   ON public.friendships FOR SELECT
   USING (auth.uid() = requester_id OR auth.uid() = addressee_id);
 
+-- Pin status to 'pending' on INSERT. Without this, a requester could insert
+-- a row with status='accepted' targeting any user and immediately unlock the
+-- friend-gated RPCs without the addressee's consent.
 CREATE POLICY "Users can send friend requests"
   ON public.friendships FOR INSERT
-  WITH CHECK (auth.uid() = requester_id);
+  WITH CHECK (auth.uid() = requester_id AND status = 'pending');
 
 -- Addressee may flip status pending → accepted. WITH CHECK rejects any other
 -- transition. Column immutability for id/requester_id/addressee_id is enforced

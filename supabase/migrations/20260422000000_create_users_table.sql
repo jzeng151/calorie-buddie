@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS public.users (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   username TEXT,
   avatar_url TEXT,
-  daily_calorie_target INTEGER NOT NULL DEFAULT 2000,
+  daily_calorie_target INTEGER NOT NULL DEFAULT 2000
+    CHECK (daily_calorie_target > 0),
   onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
