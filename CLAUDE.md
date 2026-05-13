@@ -17,6 +17,21 @@ Key routing rules:
 - Visual audit, design polish → invoke design-review
 - Architecture review → invoke plan-eng-review
 
+## Design System
+
+Always read [DESIGN.md](./DESIGN.md) before making any visual or UI decision.
+All font choices, colors, spacing, motion, and aesthetic direction are defined
+there. Do not deviate without explicit user approval.
+
+Key guardrails:
+- Coral `#e85d4f` is the action color, never green.
+- Fraunces (serif) for display; Instrument Sans for body; Geist Mono for numbers.
+- Buddy voice = `Fraunces Italic`; system voice = `Instrument Sans`.
+- No `system-ui`/`Arial` as primary font anywhere.
+- See DESIGN.md "Anti-slop guardrails" for the full no-go list.
+
+In QA mode, flag any code that doesn't match DESIGN.md.
+
 ## Testing
 
 - Unit/component: `npm test` (Vitest + Testing Library, jsdom). Files under `test/` or co-located `*.test.tsx`.
