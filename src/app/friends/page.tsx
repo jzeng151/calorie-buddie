@@ -164,7 +164,11 @@ export default function FriendsPage() {
 
   async function declineRequest(friendshipId: string) {
     const supabase = createClient();
-    await supabase.from("friendships").delete().eq("id", friendshipId);
+    const { error } = await supabase.from("friendships").delete().eq("id", friendshipId);
+    if (error) {
+      alert("Couldn't decline that request. Please try again.");
+      return;
+    }
     setPending((prev) => prev.filter((r) => r.friendship_id !== friendshipId));
   }
 

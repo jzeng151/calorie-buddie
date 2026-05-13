@@ -46,6 +46,16 @@ CREATE POLICY "Users can update their own buddy"
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+-- Column-level GRANT restricts which fields the client can write directly.
+-- Server-controlled columns (emotion, decor_unlocks, last_recomputed_at) are
+-- only writable via SECURITY DEFINER RPCs (unlock_decor and the future state
+-- recomputer), which run as the function owner and bypass these grants.
+-- Without this, a client could PATCH decor_unlocks to forge unlocks or pin
+-- emotion='celebrating' to surface forged state in friend payloads.
+REVOKE UPDATE ON public.buddy_state FROM authenticated;
+GRANT UPDATE (name, acknowledged_unlocks, last_acknowledged_emotion)
+  ON public.buddy_state TO authenticated;
+
 -- INSERT is via the trigger below, not the client; no INSERT policy needed.
 -- Friend reads go through get_friend_buddy_payload (SECURITY DEFINER), never RLS.
 
