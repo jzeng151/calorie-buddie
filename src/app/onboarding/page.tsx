@@ -17,11 +17,16 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.user_metadata?.onboarding_completed) {
-        router.replace("/");
-      }
-    });
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await supabase
+        .from("users")
+        .select("onboarding_completed")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (profile?.onboarding_completed) router.replace("/");
+    })();
   }, [router]);
 
   async function handleComplete() {
@@ -49,8 +54,6 @@ export default function OnboardingPage() {
       setLoading(false);
       return;
     }
-
-    await supabase.auth.updateUser({ data: { onboarding_completed: true } });
 
     router.push("/");
     router.refresh();

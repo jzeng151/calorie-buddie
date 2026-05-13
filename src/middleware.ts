@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { decideRoute } from "@/lib/auth/route-gate";
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -27,25 +28,27 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  const { pathname } = request.nextUrl;
-  const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/signup");
-  const isOnboardingPage = pathname.startsWith("/onboarding");
-  const onboardingCompleted = user?.user_metadata?.onboarding_completed;
-
-  if (!user && !isAuthPage) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  // Source of truth: public.users.onboarding_completed (RLS-locked, server-only).
+  // Never trust user_metadata — it is user-writable from the browser.
+  let onboardingCompleted = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("users")
+      .select("onboarding_completed")
+      .eq("id", user.id)
+      .maybeSingle();
+    onboardingCompleted = profile?.onboarding_completed ?? false;
   }
 
-  if (user && isAuthPage) {
-    return NextResponse.redirect(
-      new URL(onboardingCompleted ? "/" : "/onboarding", request.url)
-    );
-  }
+  const decision = decideRoute({
+    pathname: request.nextUrl.pathname,
+    userId: user?.id ?? null,
+    onboardingCompleted,
+  });
 
-  if (user && !onboardingCompleted && !isOnboardingPage) {
-    return NextResponse.redirect(new URL("/onboarding", request.url));
+  if (decision.type === "redirect") {
+    return NextResponse.redirect(new URL(decision.to, request.url));
   }
-
   return supabaseResponse;
 }
 

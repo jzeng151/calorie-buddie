@@ -7,8 +7,9 @@ type UserProfile = {
   id: string;
   username: string | null;
   avatar_url: string | null;
-  daily_calorie_target: number;
 };
+
+type FriendProfile = UserProfile & { daily_calorie_target: number };
 
 type Friendship = {
   id: string;
@@ -17,7 +18,7 @@ type Friendship = {
   status: "pending" | "accepted";
 };
 
-type FriendWithStats = UserProfile & {
+type FriendWithStats = FriendProfile & {
   friendship_id: string;
   total_kcal: number;
 };
@@ -32,7 +33,7 @@ function displayName(p: UserProfile) {
 }
 
 export default function FriendsPage() {
-  const [me, setMe] = useState<UserProfile | null>(null);
+  const [me, setMe] = useState<FriendProfile | null>(null);
   const [friends, setFriends] = useState<FriendWithStats[]>([]);
   const [pending, setPending] = useState<PendingRequest[]>([]);
   const [sentIds, setSentIds] = useState<Set<string>>(new Set());
@@ -50,11 +51,11 @@ export default function FriendsPage() {
     if (!user) { setLoading(false); return; }
 
     const [profileRes, friendshipsRes] = await Promise.all([
-      supabase.from("users").select("id, username, avatar_url, daily_calorie_target").eq("id", user.id).single(),
+      supabase.from("users").select("id, username, avatar_url, daily_calorie_target").eq("id", user.id).maybeSingle(),
       supabase.from("friendships").select("id, requester_id, addressee_id, status"),
     ]);
 
-    const myProfile = profileRes.data as UserProfile | null;
+    const myProfile = profileRes.data as FriendProfile | null;
     setMe(myProfile);
 
     const allFriendships: Friendship[] = (friendshipsRes.data ?? []) as Friendship[];
@@ -83,16 +84,17 @@ export default function FriendsPage() {
       return;
     }
 
-    const [profilesRes, statsRes] = await Promise.all([
-      supabase
-        .from("users")
-        .select("id, username, avatar_url, daily_calorie_target")
-        .in("id", allIdsToFetch),
+    const [friendProfilesRes, requestProfilesRes, statsRes] = await Promise.all([
+      supabase.rpc("get_friend_profiles", { friend_ids: friendIds }),
+      supabase.rpc("get_request_profiles", { other_ids: requesterIds }),
       supabase.rpc("get_friend_daily_stats", { friend_ids: friendIds }),
     ]);
 
-    const profileMap = new Map<string, UserProfile>(
-      (profilesRes.data ?? []).map((p: UserProfile) => [p.id, p])
+    const friendProfileMap = new Map<string, FriendProfile>(
+      (friendProfilesRes.data ?? []).map((p: FriendProfile) => [p.id, p])
+    );
+    const requesterProfileMap = new Map<string, UserProfile>(
+      (requestProfilesRes.data ?? []).map((p: UserProfile) => [p.id, p])
     );
     const statsMap = new Map<string, number>(
       (statsRes.data ?? []).map((s: { user_id: string; total_kcal: number }) => [
@@ -105,7 +107,7 @@ export default function FriendsPage() {
       accepted
         .map((f) => {
           const friendId = f.requester_id === user.id ? f.addressee_id : f.requester_id;
-          const profile = profileMap.get(friendId);
+          const profile = friendProfileMap.get(friendId);
           if (!profile) return null;
           return {
             ...profile,
@@ -119,7 +121,7 @@ export default function FriendsPage() {
     setPending(
       incomingPending
         .map((f) => {
-          const requester = profileMap.get(f.requester_id);
+          const requester = requesterProfileMap.get(f.requester_id);
           if (!requester) return null;
           return { friendship_id: f.id, requester };
         })
@@ -133,12 +135,9 @@ export default function FriendsPage() {
     if (!searchQuery.trim() || !me) return;
     setSearching(true);
     const supabase = createClient();
-    const { data } = await supabase
-      .from("users")
-      .select("id, username, avatar_url, daily_calorie_target")
-      .ilike("username", `%${searchQuery.trim()}%`)
-      .neq("id", me.id)
-      .limit(8);
+    const { data } = await supabase.rpc("search_users", {
+      search_query: searchQuery.trim(),
+    });
     setSearchResults((data ?? []) as UserProfile[]);
     setSearching(false);
   }
@@ -272,6 +271,7 @@ export default function FriendsPage() {
                       onClick={() => removeFriend(f.friendship_id)}
                       style={removeButtonStyle}
                       title="Remove friend"
+                      aria-label={`Remove ${displayName(f)} from friends`}
                     >
                       ✕
                     </button>
