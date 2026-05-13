@@ -88,13 +88,35 @@ CREATE POLICY "Addressees can accept requests"
     AND status IN ('pending', 'accepted')
   );
 
--- Disallow self-friending at the constraint level.
-ALTER TABLE public.friendships
-  ADD CONSTRAINT friendships_no_self_friend
-  CHECK (requester_id <> addressee_id);
+-- WITH CHECK can't reference OLD values, so column immutability for id,
+-- requester_id, and addressee_id is enforced with a BEFORE UPDATE trigger.
+-- Without this, an addressee could rewrite requester_id and forge an accepted
+-- friendship with a user who never sent a request.
+CREATE OR REPLACE FUNCTION public.friendships_pin_identity()
+RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.id IS DISTINCT FROM OLD.id THEN
+    RAISE EXCEPTION 'friendships.id is immutable';
+  END IF;
+  IF NEW.requester_id IS DISTINCT FROM OLD.requester_id THEN
+    RAISE EXCEPTION 'friendships.requester_id is immutable';
+  END IF;
+  IF NEW.addressee_id IS DISTINCT FROM OLD.addressee_id THEN
+    RAISE EXCEPTION 'friendships.addressee_id is immutable';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS friendships_pin_identity_trg ON public.friendships;
+CREATE TRIGGER friendships_pin_identity_trg
+  BEFORE UPDATE ON public.friendships
+  FOR EACH ROW EXECUTE FUNCTION public.friendships_pin_identity();
 
 -- Disallow (A→B) and (B→A) coexisting. The original UNIQUE(requester, addressee)
--- only blocked exact-direction duplicates.
+-- only blocked exact-direction duplicates. Self-friend is already blocked by
+-- the friendships_no_self_friend CHECK on the table.
 CREATE UNIQUE INDEX IF NOT EXISTS friendships_unordered_pair_uniq
   ON public.friendships (
     LEAST(requester_id, addressee_id),

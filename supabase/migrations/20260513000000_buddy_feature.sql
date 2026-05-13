@@ -100,15 +100,31 @@ CREATE POLICY "Users can view their own hydration logs"
 -- user logged at least one meal. Day boundaries use server-local midnight
 -- via date_trunc; the TZ-aware variant is a separate TODOS.md item.
 
+-- target_user_id is gated on self-or-accepted-friend against auth.uid() so the
+-- SECURITY DEFINER bypass of meals_log RLS can't leak meal cadence for
+-- arbitrary users.
 CREATE OR REPLACE FUNCTION public.compute_user_streak(target_user_id UUID)
 RETURNS INTEGER
 SECURITY DEFINER SET search_path = public
 LANGUAGE sql STABLE AS $$
-  WITH active_days AS (
+  WITH authorized AS (
+    SELECT 1
+    WHERE target_user_id = auth.uid()
+       OR EXISTS (
+         SELECT 1 FROM public.friendships f
+         WHERE f.status = 'accepted'
+           AND (
+             (f.requester_id = auth.uid() AND f.addressee_id = target_user_id)
+             OR (f.addressee_id = auth.uid() AND f.requester_id = target_user_id)
+           )
+       )
+  ),
+  active_days AS (
     SELECT DISTINCT date_trunc('day', logged_at)::date AS day
     FROM public.meals_log
     WHERE user_id = target_user_id
       AND logged_at >= NOW() - INTERVAL '400 days'
+      AND EXISTS (SELECT 1 FROM authorized)
   ),
   numbered AS (
     SELECT day, ROW_NUMBER() OVER (ORDER BY day DESC) AS rn
