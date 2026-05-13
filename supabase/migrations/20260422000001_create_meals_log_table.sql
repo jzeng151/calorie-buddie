@@ -22,3 +22,7 @@ CREATE POLICY "Users can insert their own meals"
 CREATE POLICY "Users can delete their own meals"
   ON public.meals_log FOR DELETE
   USING (auth.uid() = user_id);
+
+-- Hot query path: /home, /menu, /history all hit (user_id, logged_at DESC).
+CREATE INDEX IF NOT EXISTS meals_log_user_logged_at_idx
+  ON public.meals_log (user_id, logged_at DESC);
