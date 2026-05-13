@@ -7,16 +7,38 @@ Format: items grouped by component, then by priority (P0 → P4), Completed at b
 ## Buddy feature (next major)
 
 **Priority:** P1 — Approved design doc in `~/.gstack/projects/.../design-20260512-003749.md`.
-The Tamagotchi-style health companion. 3-week build plan locked in.
+Design-reviewed 2026-05-13 (/plan-design-review): 5/10 → 8/10 with all 7 passes
+locked in. The Tamagotchi-style health companion. 3-week build plan locked in.
 
-- Week 1: `buddy_state` + `hydration_logs` schema, hydration tap on home, pure
-  state computer with tests, Day-3 art lock, buddy room screen.
+### ~~P0 — DESIGN.md prerequisite~~ ✅ Done 2026-05-13
+
+DESIGN.md written via `/design-consultation`. Locked: Fraunces serif + Instrument
+Sans + Geist Mono, warm earth palette + coral-red `#e85d4f` accent, italic
+buddy-voice, hierarchical radius, 8px spacing base. v1.5 character pass tracked
+inside DESIGN.md. CLAUDE.md updated with the design-system hook.
+
+### P0 — Day 0 token migration (before any buddy code)
+
+Replace `src/app/globals.css` body font (`Arial, Helvetica, sans-serif` — the
+"I gave up on typography" signal) and rename partial tokens to the canonical
+set in DESIGN.md. Add Google Fonts `<link>` to `src/app/layout.tsx`. Add
+`.buddy-voice` / `.system-voice` / `.num` utility classes. ~1 hour of work,
+must precede any new component build.
+
+### P1 — Build plan (after DESIGN.md)
+
+- Week 1: `buddy_state` + `hydration_logs` schema **including new
+  `last_acknowledged_emotion` column** (gates recovery animation), hydration
+  tap on home, pure state computer with tests, Day-3 art lock (buddy + light
+  & dark room backdrops + 3 stats icons + display typeface), buddy room screen,
+  **Day-0 naming prompt** on home hero.
 - Week 2: Home reshuffle around buddy hero, decor unlocks + emotion transitions,
-  buddy naming flow.
-- Week 3: Friend room visit `/friends/[id]/room`, decay tuning, Lottie/Rive SSR
-  hardening.
+  share button on `/buddy` header (PNG-generated room export), front-loaded
+  decor curve (water bowl D1, plant D3, rug D5, treadmill D7, trophy D14, lamp D30).
+- Week 3: Friend room visit `/friends/[id]/room`, decay tuning, Rive SSR
+  hardening, a11y pass (VoiceOver, tab-only nav, reduced-motion verification).
 
-**Depends on:** none — this branch ships the foundation the design doc assumes.
+**Depends on:** `/design-consultation` → DESIGN.md (P0 above).
 
 ---
 

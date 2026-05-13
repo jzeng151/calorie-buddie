@@ -4,6 +4,26 @@ All notable changes to Calorie Buddie are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions use
 MAJOR.MINOR.PATCH.MICRO.
 
+## [0.1.0.1] - 2026-05-13
+
+Design system foundation and Buddy feature database layer. No new user-facing
+features — this is the groundwork the Buddy build sits on top of.
+
+### Added
+- `DESIGN.md` — canonical design system spec (Fraunces serif, Instrument Sans
+  body, Geist Mono numerics, warm earth palette with coral `#e85d4f` accent,
+  buddy-voice italic, hierarchical radius, 8px spacing base, dark mode tokens).
+- Supabase migration `20260513000000_buddy_feature.sql` — `buddy_state` and
+  `hydration_logs` tables plus 4 RPCs for the Buddy feature.
+- `globals.css` canonical design tokens with light/dark palettes and motion +
+  typography scales.
+- Fraunces, Instrument Sans, and Geist Mono via `next/font` in the root layout.
+
+### Changed
+- `CLAUDE.md` — added Design System guardrails section pointing at DESIGN.md.
+- `TODOS.md` — Buddy section updated with design-review outcomes; Day-0 token
+  migration marked done.
+
 ## [0.1.0.0] - 2026-05-12
 
 First end-to-end MVP. You can sign up, set a daily calorie target, log
