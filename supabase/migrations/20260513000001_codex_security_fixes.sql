@@ -107,3 +107,16 @@ DROP TRIGGER IF EXISTS friendships_pin_identity_trg ON public.friendships;
 CREATE TRIGGER friendships_pin_identity_trg
   BEFORE UPDATE ON public.friendships
   FOR EACH ROW EXECUTE FUNCTION public.friendships_pin_identity();
+
+-- ── 4. users UPDATE: add WITH CHECK to block id rewrites ────────────────────
+-- Original policy only had USING (auth.uid() = id); the absence of WITH CHECK
+-- meant a user could UPDATE their own row and rewrite `id` to another
+-- auth.users UUID (cross-account profile tampering against accounts that
+-- don't yet have a public.users row).
+
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.users;
+
+CREATE POLICY "Users can update their own profile"
+  ON public.users FOR UPDATE
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
