@@ -28,7 +28,7 @@ export default function SignupPage() {
     }
 
     // If email confirmation is enabled, signUp returns no session. Routing
-    // to /onboarding would bounce off middleware (userId is null) back to
+    // to /onboarding would bounce off the proxy (userId is null) back to
     // /login — show a pending-verification state instead.
     if (!data.session) {
       setAwaitingConfirmation(true);
